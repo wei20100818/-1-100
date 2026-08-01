@@ -1,0 +1,23 @@
+node_modules/
+coverage/
+test-results/
+playwright-report/
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+
+# Editor and OS temporary files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.tmp
+*.temp
+*.log
+Desktop.ini
+ehthumbs.db
+.DS_Store
+Thumbs.db

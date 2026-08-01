@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#080b1c" />
+    <meta name="description" content="猜數字：一款純前端的 1 到 100 數字猜謎遊戲。" />
+    <title>猜數字｜Number Signal</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell" data-view="home">
+      <div class="background-layer" aria-hidden="true">
+        <div class="background-gradient"></div>
+        <div class="background-grid"></div>
+        <div class="ambient-orb ambient-orb--one"></div>
+        <div class="ambient-orb ambient-orb--two"></div>
+        <div class="star-field">
+          <span class="star star--one"></span>
+          <span class="star star--two"></span>
+          <span class="star star--three"></span>
+          <span class="star star--four"></span>
+          <span class="star star--five"></span>
+        </div>
+      </div>
+
+      <canvas id="particle-canvas" class="particle-canvas" aria-hidden="true"></canvas>
+
+      <main class="app-main">
+        <section class="screen screen--home" data-screen="home" aria-labelledby="home-title">
+          <div class="screen__eyebrow">NUMBER SIGNAL <span aria-hidden="true">/</span> 01</div>
+          <div class="glass-card hero-card">
+            <div class="hero-card__topline">
+              <span class="status-dot" aria-hidden="true"></span>
+              <span>READY TO PLAY</span>
+            </div>
+            <div class="hero-card__content">
+              <p class="section-kicker">A SMALL GAME OF INTUITION</p>
+              <h1 id="home-title">猜數字</h1>
+              <p class="hero-card__description">
+                找出藏在 1 到 100 之間的數字。每次猜測都會收到方向提示，直到鎖定答案。
+              </p>
+              <button class="button button--primary button--start" id="start-game" type="button">
+                <span>開始遊戲</span>
+                <span class="button__arrow" aria-hidden="true">↗</span>
+              </button>
+            </div>
+            <div class="hero-card__footer">
+              <span>1 — 100</span>
+              <span aria-hidden="true">·</span>
+              <span>UNLIMITED GUESSES</span>
+            </div>
+          </div>
+
+          <div class="stats-wrap">
+            <button
+              class="stats-toggle"
+              id="stats-toggle"
+              type="button"
+              aria-expanded="false"
+              aria-controls="stats-panel"
+            >
+              <span class="stats-toggle__label">個人紀錄</span>
+              <span class="stats-toggle__hint">LOCAL MEMORY</span>
+              <span class="stats-toggle__icon" aria-hidden="true">+</span>
+            </button>
+            <section class="glass-card stats-panel" id="stats-panel" aria-labelledby="stats-title" hidden>
+              <h2 id="stats-title" class="sr-only">遊戲統計</h2>
+              <div class="stat-item">
+                <span class="stat-item__label">完成局數</span>
+                <strong class="stat-item__value" data-stat="completed">0</strong>
+              </div>
+              <div class="stat-item">
+                <span class="stat-item__label">累計猜測次數</span>
+                <strong class="stat-item__value" data-stat="guesses">0</strong>
+              </div>
+              <div class="stat-item">
+                <span class="stat-item__label">最佳紀錄</span>
+                <strong class="stat-item__value" data-stat="best">—</strong>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section class="screen screen--game" data-screen="game" aria-labelledby="game-title" hidden>
+          <header class="game-header">
+            <button class="button button--ghost back-button" id="back-home" type="button">
+              <span aria-hidden="true">←</span>
+              <span>返回首頁</span>
+            </button>
+            <div class="game-header__signal" aria-hidden="true">
+              <span class="status-dot"></span>
+              LIVE ROUND
+            </div>
+            <span class="game-header__index">ROUND 01</span>
+          </header>
+
+          <div class="glass-card game-card">
+            <div class="game-card__heading">
+              <p class="section-kicker">FIND THE HIDDEN SIGNAL</p>
+              <h2 id="game-title">你的直覺準備好了嗎？</h2>
+              <p>輸入 1 到 100 的整數，開始你的推理。</p>
+            </div>
+
+            <div class="guess-display" aria-live="polite" aria-atomic="true">
+              <span class="guess-display__label">CURRENT INPUT</span>
+              <input
+                class="guess-display__number"
+                id="guess-input"
+                type="text"
+                inputmode="numeric"
+                autocomplete="off"
+                maxlength="3"
+                value=""
+                readonly
+                aria-readonly="true"
+                aria-label="目前猜測數字"
+                placeholder="—"
+              />
+            </div>
+
+            <div class="feedback feedback--neutral" id="feedback" role="status" aria-live="polite">
+              <span class="feedback__icon" aria-hidden="true">◈</span>
+              <span id="feedback-message">等待你的第一次猜測</span>
+            </div>
+
+            <div class="guess-meta">
+              <span>本局猜測次數</span>
+              <strong id="guess-count">0</strong>
+            </div>
+
+            <div class="keypad keypad--medium" id="keypad" aria-label="畫面數字鍵盤">
+              <div class="keypad__toolbar">
+                <span class="keypad__title">INPUT DECK</span>
+                <div class="keypad__size-controls" aria-label="鍵盤尺寸">
+                  <button class="icon-button" id="keypad-smaller" type="button" aria-label="鍵盤縮小">−</button>
+                  <span id="keypad-size-label">中</span>
+                  <button class="icon-button" id="keypad-larger" type="button" aria-label="鍵盤放大">＋</button>
+                </div>
+              </div>
+              <div class="keypad__grid">
+                <button class="key-button" type="button" data-key="1">1</button>
+                <button class="key-button" type="button" data-key="2">2</button>
+                <button class="key-button" type="button" data-key="3">3</button>
+                <button class="key-button" type="button" data-key="4">4</button>
+                <button class="key-button" type="button" data-key="5">5</button>
+                <button class="key-button" type="button" data-key="6">6</button>
+                <button class="key-button" type="button" data-key="7">7</button>
+                <button class="key-button" type="button" data-key="8">8</button>
+                <button class="key-button" type="button" data-key="9">9</button>
+                <button class="key-button key-button--utility" type="button" data-key="clear">清除</button>
+                <button class="key-button" type="button" data-key="0">0</button>
+                <button class="key-button key-button--utility" type="button" data-key="backspace">退格</button>
+                <button class="key-button key-button--utility" type="button" data-key="decrease" aria-label="數值減少">↓</button>
+                <button class="key-button key-button--submit" type="button" data-key="submit">送出</button>
+                <button class="key-button key-button--utility" type="button" data-key="increase" aria-label="數值增加">↑</button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <div class="overlay" id="leave-dialog" role="presentation" hidden>
+        <section class="glass-card dialog" role="dialog" aria-modal="true" aria-labelledby="leave-title" aria-describedby="leave-description">
+          <span class="dialog__mark" aria-hidden="true">!</span>
+          <p class="section-kicker">ROUND IN PROGRESS</p>
+          <h2 id="leave-title">要離開這一局嗎？</h2>
+          <p id="leave-description">目前進度將會失去，但你的長期紀錄不會受到影響。</p>
+          <div class="dialog__actions">
+            <button class="button button--ghost" id="continue-game" type="button">繼續遊戲</button>
+            <button class="button button--primary" id="confirm-leave" type="button">返回首頁</button>
+          </div>
+        </section>
+      </div>
+
+      <div class="overlay" id="success-dialog" role="presentation" hidden>
+        <section class="glass-card dialog dialog--success" role="dialog" aria-modal="true" aria-labelledby="success-title">
+          <span class="dialog__mark dialog__mark--success" aria-hidden="true">✓</span>
+          <p class="section-kicker">SIGNAL FOUND</p>
+          <h2 id="success-title">猜中了！</h2>
+          <p>答案已被成功鎖定。</p>
+          <div class="success-result">
+            <span>ANSWER</span>
+            <strong id="success-answer">—</strong>
+          </div>
+          <p class="success-count">本局猜測 <strong id="success-guess-count">0</strong> 次</p>
+          <button class="button button--primary" id="play-again" type="button">再玩一次</button>
+        </section>
+      </div>
+    </div>
+
+    <script type="module" src="./src/app.js"></script>
+  </body>
+</html>

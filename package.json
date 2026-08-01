@@ -1,0 +1,10 @@
+{
+  "name": "number-signal-game",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "test:syntax": "node --check src/app.js && node --check src/game.js && node --check src/storage.js && node --check src/particles.js"
+  }
+}
