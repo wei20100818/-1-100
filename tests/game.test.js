@@ -4,9 +4,11 @@ import {
   compareGuess,
   createDefaultStats,
   createInitialGameState,
+  createPossibleRange,
   createRoundState,
   generateRandomInteger,
   normalizeStats,
+  narrowPossibleRange,
   recordCompletedGame,
   recordValidGuess,
   submitGuess,
@@ -36,6 +38,19 @@ test("new round starts with a clean playing state", () => {
   assert.deepEqual([...round.guessedNumbers], []);
   assert.equal(round.status, "playing");
   assert.equal(round.lastResult, null);
+  assert.deepEqual(round.possibleRange, createPossibleRange());
+});
+
+test("possible range narrows after each valid directional guess", () => {
+  const round = createRoundState(() => 0.5);
+  const tooSmall = submitGuess(round, "40");
+  const tooLarge = submitGuess(tooSmall.round, "80");
+  const winning = submitGuess(tooLarge.round, "51");
+
+  assert.deepEqual(tooSmall.round.possibleRange, { min: 41, max: 100 });
+  assert.deepEqual(tooLarge.round.possibleRange, { min: 41, max: 79 });
+  assert.deepEqual(winning.round.possibleRange, { min: 51, max: 51 });
+  assert.deepEqual(narrowPossibleRange(undefined, 40, "tooSmall"), { min: 41, max: 100 });
 });
 
 test("initial game state starts on the home view with medium keypad", () => {

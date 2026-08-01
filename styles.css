@@ -780,6 +780,42 @@ button:disabled {
   animation: feedback-pulse 420ms var(--ease-standard) both;
 }
 
+.possible-range {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0.15rem auto 0.35rem;
+  gap: 0.65rem;
+  padding: 0.45rem 0.85rem;
+  border: 1px solid rgba(117, 220, 255, 0.2);
+  border-radius: 999px;
+  background: rgba(117, 220, 255, 0.055);
+  color: var(--color-text-muted);
+  font-size: 0.74rem;
+  letter-spacing: 0.04em;
+}
+
+.possible-range__label {
+  white-space: nowrap;
+}
+
+.possible-range strong {
+  color: var(--color-too-small);
+  font-family: var(--font-number);
+  font-size: 0.98rem;
+  font-weight: 550;
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.possible-range--pulse {
+  animation: possible-range-pulse 420ms var(--ease-standard) both;
+}
+
 .guess-meta {
   position: relative;
   z-index: 1;
@@ -1064,6 +1100,12 @@ button:disabled {
   0% { opacity: 0.2; transform: translateY(0.25rem); }
   55% { opacity: 1; transform: translateY(-0.08rem); }
   100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes possible-range-pulse {
+  0% { opacity: 0.3; transform: translateY(0.22rem) scale(0.98); }
+  65% { opacity: 1; transform: translateY(-0.04rem) scale(1.01); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 @keyframes background-breathe {

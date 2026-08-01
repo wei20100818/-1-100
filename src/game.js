@@ -41,7 +41,39 @@ export function createRoundState(random = Math.random) {
     guessedNumbers: new Set(),
     status: ROUND_STATUSES.playing,
     lastResult: null,
+    possibleRange: createPossibleRange(),
   };
+}
+
+export function createPossibleRange() {
+  return {
+    min: MIN_NUMBER,
+    max: MAX_NUMBER,
+  };
+}
+
+export function narrowPossibleRange(range, guess, result) {
+  const currentRange = range ?? createPossibleRange();
+
+  if (result === "tooSmall") {
+    return {
+      min: Math.max(currentRange.min, guess + 1),
+      max: currentRange.max,
+    };
+  }
+
+  if (result === "tooLarge") {
+    return {
+      min: currentRange.min,
+      max: Math.min(currentRange.max, guess - 1),
+    };
+  }
+
+  if (result === "correct") {
+    return { min: guess, max: guess };
+  }
+
+  return { ...currentRange };
 }
 
 export function createGameStateWithRound(stats = createDefaultStats(), random = Math.random) {
@@ -111,6 +143,7 @@ export function submitGuess(round, input) {
   const result = compareGuess(validation.guess, round.answer);
   const guessedNumbers = new Set(round.guessedNumbers);
   guessedNumbers.add(validation.guess);
+  const possibleRange = narrowPossibleRange(round.possibleRange, validation.guess, result);
 
   return {
     round: {
@@ -120,6 +153,7 @@ export function submitGuess(round, input) {
       guessedNumbers,
       status: result === "correct" ? ROUND_STATUSES.completed : ROUND_STATUSES.playing,
       lastResult: result,
+      possibleRange,
     },
     validation,
     result,

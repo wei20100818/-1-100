@@ -29,6 +29,8 @@ const dom = {
   feedback: document.querySelector("#feedback"),
   feedbackIcon: document.querySelector(".feedback__icon"),
   feedbackMessage: document.querySelector("#feedback-message"),
+  possibleRange: document.querySelector("#possible-range"),
+  possibleRangeValue: document.querySelector("#possible-range-value"),
   guessCount: document.querySelector("#guess-count"),
   keypad: document.querySelector("#keypad"),
   keypadButtons: document.querySelectorAll("[data-key]"),
@@ -94,6 +96,7 @@ function startNewRound({ transitionFromHome = false } = {}) {
   dom.gameScreen.removeAttribute("inert");
   dom.guessInput.disabled = false;
   clearSuccessDisplay();
+  clearPossibleRange();
   setInput("");
   updateRoundDisplay();
   setFeedback("等待你的第一次猜測", "neutral", "◈");
@@ -156,6 +159,7 @@ function returnToHome() {
   dom.gameScreen.removeAttribute("inert");
   dom.guessInput.disabled = false;
   clearSuccessDisplay();
+  clearPossibleRange();
   updateStatsDisplay();
   setView("home");
 }
@@ -322,6 +326,7 @@ function submitCurrentGuess() {
   updateRoundDisplay();
 
   if (outcome.result === "correct") {
+    clearPossibleRange();
     appState.stats = saveStats(recordCompletedGame(appState.stats, appState.round.guessCount));
     showSuccessDialog();
     particleLayer.burst();
@@ -333,6 +338,8 @@ function submitCurrentGuess() {
   } else {
     setFeedback("太大", "too-large", "↑");
   }
+
+  setPossibleRange(appState.round.possibleRange);
 
   dom.guessInput.focus();
 }
@@ -354,6 +361,25 @@ function setFeedback(message, state, icon) {
   dom.feedbackMessage.textContent = message;
   void dom.feedback.offsetWidth;
   dom.feedback.classList.add("feedback--pulse");
+}
+
+function setPossibleRange(range) {
+  if (!range) {
+    clearPossibleRange();
+    return;
+  }
+
+  dom.possibleRangeValue.textContent = `${range.min}～${range.max}`;
+  dom.possibleRange.hidden = false;
+  dom.possibleRange.classList.remove("possible-range--pulse");
+  void dom.possibleRange.offsetWidth;
+  dom.possibleRange.classList.add("possible-range--pulse");
+}
+
+function clearPossibleRange() {
+  dom.possibleRange.hidden = true;
+  dom.possibleRange.classList.remove("possible-range--pulse");
+  dom.possibleRangeValue.textContent = "—";
 }
 
 function updateRoundDisplay() {
@@ -411,6 +437,7 @@ function closeLeaveDialog() {
 
 function showSuccessDialog() {
   stopRepeating();
+  clearPossibleRange();
   dom.gameScreen.inert = true;
   dom.gameScreen.setAttribute("inert", "");
   dom.guessInput.disabled = true;
